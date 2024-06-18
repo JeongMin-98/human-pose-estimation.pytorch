@@ -22,7 +22,6 @@ from pycocotools.cocoeval import COCOeval
 from dataset.JointsDataset import JointsDataset
 from nms.nms import oks_nms
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -51,6 +50,7 @@ class COCODataset(JointsDataset):
         [16,14],[14,12],[17,15],[15,13],[12,13],[6,12],[7,13], [6,7],[6,8],
         [7,9],[8,10],[9,11],[2,3],[1,2],[1,3],[2,4],[3,5],[4,6],[5,7]]
     '''
+
     def __init__(self, cfg, root, image_set, is_train, transform=None):
         super().__init__(cfg, root, image_set, is_train, transform)
         self.nms_thre = cfg.TEST.NMS_THRE
@@ -95,11 +95,18 @@ class COCODataset(JointsDataset):
         logger.info('=> load {} samples'.format(len(self.db)))
 
     def _get_ann_file_keypoint(self):
-        """ self.root / annotations / person_keypoints_train2017.json """
-        prefix = 'person_keypoints' \
+        """ self.root / annotations / person_keypoints_train2017.json
+            In RHPE or RSNA dataset, the prefix is RHPE_anaotomical_ROIs.
+
+         """
+        # prefix = 'person_keypoints' \
+        prefix = 'RHPE_anatomical_ROIs' \
             if 'test' not in self.image_set else 'image_info'
+
+        image_set = self.image_set.split('_')[-1]
+
         return os.path.join(self.root, 'annotations',
-                            prefix + '_' + self.image_set + '.json')
+                            prefix + '_' + image_set + '.json')
 
     def _load_image_set_index(self):
         """ image id: int """
@@ -150,7 +157,7 @@ class COCODataset(JointsDataset):
             y2 = np.min((height - 1, y1 + np.max((0, h - 1))))
             if obj['area'] > 0 and x2 >= x1 and y2 >= y1:
                 # obj['clean_bbox'] = [x1, y1, x2, y2]
-                obj['clean_bbox'] = [x1, y1, x2-x1, y2-y1]
+                obj['clean_bbox'] = [x1, y1, x2 - x1, y2 - y1]
                 valid_objs.append(obj)
         objs = valid_objs
 
@@ -213,17 +220,20 @@ class COCODataset(JointsDataset):
 
     def image_path_from_index(self, index):
         """ example: images / train2017 / 000000119993.jpg """
-        file_name = '%012d.jpg' % index
-        if '2014' in self.image_set:
-            file_name = 'COCO_%s_' % self.image_set + file_name
+        # file_name = '%012d.jpg' % index
+        file_name = self.coco.loadImgs(index)[0]['file_name']
+        # print("image_set", self.image_set)
+        # print(f'file_name {file_name}')
+        # if '2014' in self.image_set:
+        #     file_name = 'COCO_%s_' % self.image_set + file_name
 
-        prefix = 'test2017' if 'test' in self.image_set else self.image_set
+        # prefix = 'test2017' if 'test' in self.image_set else self.image_set
+        prefix = self.image_set
 
         data_name = prefix + '.zip@' if self.data_format == 'zip' else prefix
 
         image_path = os.path.join(
-            self.root, 'images', data_name, file_name)
-
+            self.root, 'images', data_name, prefix, file_name)
         return image_path
 
     def _load_coco_person_detection_results(self):
@@ -243,7 +253,8 @@ class COCODataset(JointsDataset):
             det_res = all_boxes[n_img]
             if det_res['category_id'] != 1:
                 continue
-            img_name = self.image_path_from_index(det_res['image_id'])
+            # img_name = self.image_path_from_index(det_res['image_id'])
+            img_name = self.image_path_from_index(det_res['id'])
             box = det_res['bbox']
             score = det_res['score']
 
