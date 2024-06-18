@@ -71,7 +71,7 @@ config.DATASET.HYBRID_JOINTS_TYPE = ''
 config.DATASET.SELECT_DATA = False
 
 # training data augmentation
-config.DATASET.FLIP = True
+config.DATASET.FLIP = False
 config.DATASET.SCALE_FACTOR = 0.25
 config.DATASET.ROT_FACTOR = 30
 

@@ -28,27 +28,27 @@ logger = logging.getLogger(__name__)
 class COCODataset(JointsDataset):
     '''
     "keypoints": {
-        0: "nose",
-        1: "left_eye",
-        2: "right_eye",
-        3: "left_ear",
-        4: "right_ear",
-        5: "left_shoulder",
-        6: "right_shoulder",
-        7: "left_elbow",
-        8: "right_elbow",
-        9: "left_wrist",
-        10: "right_wrist",
-        11: "left_hip",
-        12: "right_hip",
-        13: "left_knee",
-        14: "right_knee",
-        15: "left_ankle",
-        16: "right_ankle"
+        1: "f1_0" 엄지
+        2: "f1_1"
+        3: "f1_2"
+        4: "f2_0" 검지
+        5: "f2_1"
+        6: "f2_2"
+        7: "f3_0" 중지
+        8: "f3_1"
+        9: "f3_2"
+        10: "f4_0" 약지
+        11: "f4_1"
+        12: "f4_2"
+        13: "f5_0" 새끼손가락
+        14: "f5_1"
+        15: "f5_1"
+        16: "anchor_0"
+        17: "anchor_1"
     },
 	"skeleton": [
-        [16,14],[14,12],[17,15],[15,13],[12,13],[6,12],[7,13], [6,7],[6,8],
-        [7,9],[8,10],[9,11],[2,3],[1,2],[1,3],[2,4],[3,5],[4,6],[5,7]]
+        [1, 2], [2, 3], [3, 16], [4, 5], [5, 6], [6, 16], [7, 8], [8, 9],
+        [9, 16], [10, 11], [11, 12], [12, 16], [13, 14], [14, 15], [15, 16], [16, 17]]
     '''
 
     def __init__(self, cfg, root, image_set, is_train, transform=None):
@@ -233,7 +233,7 @@ class COCODataset(JointsDataset):
         data_name = prefix + '.zip@' if self.data_format == 'zip' else prefix
 
         image_path = os.path.join(
-            self.root, 'images', data_name, prefix, file_name)
+            self.root, 'images', data_name, file_name)
         return image_path
 
     def _load_coco_person_detection_results(self):
@@ -288,7 +288,6 @@ class COCODataset(JointsDataset):
             os.makedirs(res_folder)
         res_file = os.path.join(
             res_folder, 'keypoints_%s_results.json' % self.image_set)
-
         # person x (keypoints)
         _kpts = []
         for idx, kpt in enumerate(preds):
@@ -298,8 +297,9 @@ class COCODataset(JointsDataset):
                 'scale': all_boxes[idx][2:4],
                 'area': all_boxes[idx][4],
                 'score': all_boxes[idx][5],
-                'image': int(img_path[idx][-16:-4])
+                'image': int(img_path[idx].split('/')[-1][:-4])
             })
+            # print(_kpts[-1])
         # image x person x (keypoints)
         kpts = defaultdict(list)
         for kpt in _kpts:

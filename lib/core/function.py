@@ -15,6 +15,8 @@ import os
 import numpy as np
 import torch
 
+from tqdm import tqdm
+
 from core.config import get_model_name
 from core.evaluate import accuracy
 from core.inference import get_final_preds
