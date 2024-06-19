@@ -43,9 +43,9 @@ LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
   BATCH_SIZE: 32
-  SHUFFLE: true
+  SHUFFLE: false
   BEGIN_EPOCH: 0
-  END_EPOCH: 140
+  END_EPOCH: 20
   RESUME: false
   OPTIMIZER: 'adam'
   LR: 0.001
