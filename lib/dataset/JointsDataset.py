@@ -120,6 +120,7 @@ class JointsDataset(Dataset):
         target_weight = torch.from_numpy(target_weight)
 
         meta = {
+            'image_id': db_rec['image_id'],
             'image': image_file,
             'filename': filename,
             'imgnum': imgnum,

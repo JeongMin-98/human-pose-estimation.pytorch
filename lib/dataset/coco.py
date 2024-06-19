@@ -186,6 +186,7 @@ class COCODataset(JointsDataset):
 
             center, scale = self._box2cs(obj['clean_bbox'][:4])
             rec.append({
+                'image_id': im_ann['id'],
                 'image': self.image_path_from_index(index),
                 'center': center,
                 'scale': scale,
@@ -268,6 +269,7 @@ class COCODataset(JointsDataset):
             joints_3d_vis = np.ones(
                 (self.num_joints, 3), dtype=np.float64)
             kpt_db.append({
+                'image_id': det_res['image_id'],
                 'image': img_name,
                 'center': center,
                 'scale': scale,
@@ -281,7 +283,7 @@ class COCODataset(JointsDataset):
         return kpt_db
 
     # need double check this API and classes field
-    def evaluate(self, cfg, preds, output_dir, all_boxes, img_path,
+    def evaluate(self, cfg, preds, output_dir, all_boxes, img_path, image_id,
                  *args, **kwargs):
         res_folder = os.path.join(output_dir, 'results')
         if not os.path.exists(res_folder):
@@ -297,7 +299,8 @@ class COCODataset(JointsDataset):
                 'scale': all_boxes[idx][2:4],
                 'area': all_boxes[idx][4],
                 'score': all_boxes[idx][5],
-                'image': int(img_path[idx].split('/')[-1][:-4])
+                'image': int(img_path[idx].split('/')[-1][:-4]),
+                'image_id': image_id[idx]
             })
             # print(_kpts[-1])
         # image x person x (keypoints)
@@ -386,7 +389,7 @@ class COCODataset(JointsDataset):
                 key_points[:, ipt * 3 + 1] = _key_points[:, ipt, 1]
                 key_points[:, ipt * 3 + 2] = _key_points[:, ipt, 2]  # keypoints score.
 
-            result = [{'image_id': img_kpts[k]['image'],
+            result = [{'image_id': int(img_kpts[k]['image_id']),
                        'category_id': cat_id,
                        'keypoints': list(key_points[k]),
                        'score': img_kpts[k]['score'],
