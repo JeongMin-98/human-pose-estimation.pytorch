@@ -108,6 +108,7 @@ class JointsDataset(Dataset):
             flags=cv2.INTER_LINEAR)
 
         if self.transform:
+            # input = self.transform(data_numpy)
             input = self.transform(input)
 
         for i in range(self.num_joints):
