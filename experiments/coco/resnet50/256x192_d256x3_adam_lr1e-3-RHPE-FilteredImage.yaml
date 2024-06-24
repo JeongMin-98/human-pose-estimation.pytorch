@@ -42,7 +42,7 @@ MODEL:
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
-  COCO_FILE: 'data/coco/annotations/RHPE_anatomical_ROIs_train_filtered.json'
+  COCO_FILE: 'data/coco/annotations/RHPE_anatomical_ROIs_Filtered.json'
   BATCH_SIZE: 32
   SHUFFLE: false
   BEGIN_EPOCH: 0
