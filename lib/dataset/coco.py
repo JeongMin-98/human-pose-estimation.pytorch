@@ -102,7 +102,7 @@ class COCODataset(JointsDataset):
 
          """
 
-        if self.coco_train_json != '':
+        if self.coco_train_json != '' and 'TRAIN' in self.image_set:
             return os.path.join(self.coco_train_json)
 
         # prefix = 'person_keypoints' \
