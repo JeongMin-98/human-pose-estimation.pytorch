@@ -37,8 +37,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
     # general
     parser.add_argument('--cfg',
+                        default='experiments/coco/resnet50/256x192_d256x3_adam_lr1e-3-RHPE.yaml',
                         help='experiment configure file name',
-                        required=True,
+                        required=False,
                         type=str)
 
     args, rest = parser.parse_known_args()
@@ -120,14 +121,12 @@ def main():
 
     if config.TEST.MODEL_FILE:
         logger.info('=> loading model from {}'.format(config.TEST.MODEL_FILE))
-        model.init_weights(config.TEST.MODEL_FILE)
-        # model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
+        model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
     else:
         model_state_file = os.path.join(final_output_dir,
-                                        'model_best.pth.tar')
+                                        'final_state.pth.tar')
         logger.info('=> loading model from {}'.format(model_state_file))
-        model.init_weights(model_state_file)
-        # model.load_state_dict(torch.load(model_state_file))
+        model.load_state_dict(torch.load(model_state_file))
 
     gpus = [int(i) for i in config.GPUS.split(',')]
     model = torch.nn.DataParallel(model, device_ids=gpus).cuda()

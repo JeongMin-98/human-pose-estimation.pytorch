@@ -14,7 +14,6 @@ import yaml
 import numpy as np
 from easydict import EasyDict as edict
 
-
 config = edict()
 
 config.OUTPUT_DIR = ''
@@ -97,6 +96,8 @@ config.TRAIN.CHECKPOINT = ''
 
 config.TRAIN.BATCH_SIZE = 32
 config.TRAIN.SHUFFLE = True
+
+config.TRAIN.COCO_FILE = ''
 
 # testing
 config.TEST = edict()
@@ -193,13 +194,13 @@ def update_dir(model_dir, log_dir, data_dir):
         config.DATA_DIR = data_dir
 
     config.DATASET.ROOT = os.path.join(
-            config.DATA_DIR, config.DATASET.ROOT)
+        config.DATA_DIR, config.DATASET.ROOT)
 
     config.TEST.COCO_BBOX_FILE = os.path.join(
-            config.DATA_DIR, config.TEST.COCO_BBOX_FILE)
+        config.DATA_DIR, config.TEST.COCO_BBOX_FILE)
 
     config.MODEL.PRETRAINED = os.path.join(
-            config.DATA_DIR, config.MODEL.PRETRAINED)
+        config.DATA_DIR, config.MODEL.PRETRAINED)
 
 
 def get_model_name(cfg):
@@ -226,4 +227,5 @@ def get_model_name(cfg):
 
 if __name__ == '__main__':
     import sys
+
     gen_config(sys.argv[1])

@@ -8,9 +8,9 @@ PRINT_FREQ: 20
 DATASET:
   DATASET: 'coco'
   ROOT: 'data/coco/'
-  DATA_FORMAT: 'zip'
-  TEST_SET: 'RHPE_test'
-  TRAIN_SET: 'RHPE_train'
+  DATA_FORMAT: 'png'
+  TEST_SET: 'RHPE_VAL'
+  TRAIN_SET: 'RHPE_TRAIN'
   FLIP: true
   ROT_FACTOR: 40
   SCALE_FACTOR: 0.3
@@ -42,6 +42,7 @@ MODEL:
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
+  COCO_FILE: 'data/coco/annotations/RHPE_anatomical_ROIs_train_filtered.json'
   BATCH_SIZE: 32
   SHUFFLE: false
   BEGIN_EPOCH: 0
@@ -59,8 +60,8 @@ TRAIN:
   MOMENTUM: 0.9
   NESTEROV: false
 TEST:
-  BATCH_SIZE: 64
-  COCO_BBOX_FILE: 'data/coco/annotations/RHPE_anatomical_ROIs_test.json'
+  BATCH_SIZE: 32
+  COCO_BBOX_FILE: 'data/coco/annotations/RHPE_anatomical_ROIs_val.json'
   BBOX_THRE: 1.0
   FLIP_TEST: false
   IMAGE_THRE: 0.0

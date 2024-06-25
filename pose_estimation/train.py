@@ -42,7 +42,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
     # general
     parser.add_argument('--cfg',
-                        default='experiments/coco/resnet50/256x192_d256x3_adam_lr1e-3-RHPE.yaml',
+                        default='experiments/coco/resnet50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage.yaml',
                         help='experiment configure file name',
                         required=False,
                         type=str)
