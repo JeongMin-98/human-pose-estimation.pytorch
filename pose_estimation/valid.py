@@ -120,12 +120,14 @@ def main():
 
     if config.TEST.MODEL_FILE:
         logger.info('=> loading model from {}'.format(config.TEST.MODEL_FILE))
-        model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
+        model.init_weights(config.TEST.MODEL_FILE)
+        # model.load_state_dict(torch.load(config.TEST.MODEL_FILE))
     else:
         model_state_file = os.path.join(final_output_dir,
-                                        'final_state.pth.tar')
+                                        'model_best.pth.tar')
         logger.info('=> loading model from {}'.format(model_state_file))
-        model.load_state_dict(torch.load(model_state_file))
+        model.init_weights(model_state_file)
+        # model.load_state_dict(torch.load(model_state_file))
 
     gpus = [int(i) for i in config.GPUS.split(',')]
     model = torch.nn.DataParallel(model, device_ids=gpus).cuda()

@@ -100,8 +100,7 @@ class COCODataset(JointsDataset):
 
          """
         # prefix = 'person_keypoints' \
-        prefix = 'RHPE_anatomical_ROIs' \
-            if 'test' not in self.image_set else 'image_info'
+        prefix = 'RHPE_anatomical_ROIs'
 
         image_set = self.image_set.split('_')[-1]
 
@@ -269,7 +268,6 @@ class COCODataset(JointsDataset):
             joints_3d_vis = np.ones(
                 (self.num_joints, 3), dtype=np.float64)
             kpt_db.append({
-                'image_id': det_res['image_id'],
                 'image': img_name,
                 'center': center,
                 'scale': scale,
@@ -337,13 +335,17 @@ class COCODataset(JointsDataset):
 
         self._write_coco_keypoint_results(
             oks_nmsed_kpts, res_file)
-        if 'test' not in self.image_set:
-            info_str = self._do_python_keypoint_eval(
-                res_file, res_folder)
-            name_value = OrderedDict(info_str)
-            return name_value, name_value['AP']
-        else:
-            return {'Null': 0}, 0
+        # if 'test' not in self.image_set:
+        #     info_str = self._do_python_keypoint_eval(
+        #         res_file, res_folder)
+        #     name_value = OrderedDict(info_str)
+        #     return name_value, name_value['AP']
+        # else:
+        #     return {'Null': 0}, 0
+
+        info_str = self._do_python_keypoint_eval(res_file, res_folder)
+        name_value = OrderedDict(info_str)
+        return name_value, name_value['AP']
 
     def _write_coco_keypoint_results(self, keypoints, res_file):
         data_pack = [{'cat_id': self._class_to_coco_ind[cls],

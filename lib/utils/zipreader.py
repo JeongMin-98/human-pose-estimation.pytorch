@@ -20,18 +20,17 @@ _xml_path_zip = []
 _xml_zfile = []
 
 
-def imread(filename, flags=cv2.IMREAD_COLOR):
+def imread(filename, image_set=None, flags=cv2.IMREAD_COLOR):
     global _im_zfile
     path = filename
     pos_at = path.index('@')
-    print("play at zipread imread")
     if pos_at == -1:
         print("character '@' is not found from the given path '%s'" % (path))
         assert 0
     path_zip = path[0: pos_at].strip()
     path_img = path[pos_at + 2:].strip()
-    print(path_zip)
-    print(path_img)
+    if image_set is not None:
+        path_img = os.path.join(image_set, path_img)
     if not os.path.isfile(path_zip):
         print("zip file '%s' is not found" % (path_zip))
         assert 0

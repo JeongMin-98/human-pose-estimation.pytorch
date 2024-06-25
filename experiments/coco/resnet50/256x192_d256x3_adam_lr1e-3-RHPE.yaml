@@ -8,9 +8,9 @@ PRINT_FREQ: 20
 DATASET:
   DATASET: 'coco'
   ROOT: 'data/coco/'
-  DATA_FORMAT: 'png'
-  TEST_SET: 'RHPE_VAL'
-  TRAIN_SET: 'RHPE_TRAIN'
+  DATA_FORMAT: 'zip'
+  TEST_SET: 'RHPE_val'
+  TRAIN_SET: 'RHPE_train'
   FLIP: true
   ROT_FACTOR: 40
   SCALE_FACTOR: 0.3
