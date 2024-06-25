@@ -106,9 +106,7 @@ class COCODataset(JointsDataset):
             return os.path.join(self.coco_json)
 
         # prefix = 'person_keypoints' \
-        prefix = 'RHPE_anatomical_ROIs' \
-            if 'test' not in self.image_set else 'image_info'
-
+        prefix = 'RHPE_anatomical_ROIs'
         image_set = self.image_set.split('_')[-1]
 
         return os.path.join(self.root, 'annotations',
