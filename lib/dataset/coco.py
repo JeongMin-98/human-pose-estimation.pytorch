@@ -63,7 +63,7 @@ class COCODataset(JointsDataset):
         self.image_height = cfg.MODEL.IMAGE_SIZE[1]
         self.aspect_ratio = self.image_width * 1.0 / self.image_height
         self.pixel_std = 200
-        self.coco_train_json = cfg.TRAIN.COCO_FILE
+        self.coco_json = cfg.TRAIN.COCO_FILE if self.is_train is True else cfg.TEST.COCO_FILE
         self.coco = COCO(self._get_ann_file_keypoint())
 
         # deal with class names
@@ -102,8 +102,8 @@ class COCODataset(JointsDataset):
 
          """
 
-        if self.coco_train_json != '' and 'TRAIN' in self.image_set:
-            return os.path.join(self.coco_train_json)
+        if self.coco_json != '':
+            return os.path.join(self.coco_json)
 
         # prefix = 'person_keypoints' \
         prefix = 'RHPE_anatomical_ROIs' \
