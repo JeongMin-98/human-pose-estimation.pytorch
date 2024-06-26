@@ -97,6 +97,7 @@ config.TRAIN.CHECKPOINT = ''
 config.TRAIN.BATCH_SIZE = 32
 config.TRAIN.SHUFFLE = True
 
+# JSON
 config.TRAIN.COCO_FILE = ''
 
 # testing
@@ -118,6 +119,9 @@ config.TEST.BBOX_THRE = 1.0
 config.TEST.MODEL_FILE = ''
 config.TEST.IMAGE_THRE = 0.0
 config.TEST.NMS_THRE = 1.0
+
+# JSON
+config.TEST.COCO_FILE = ''
 
 # debug
 config.DEBUG = edict()

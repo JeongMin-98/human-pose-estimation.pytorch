@@ -63,7 +63,7 @@ class COCODataset(JointsDataset):
         self.image_height = cfg.MODEL.IMAGE_SIZE[1]
         self.aspect_ratio = self.image_width * 1.0 / self.image_height
         self.pixel_std = 200
-        self.coco_train_json = cfg.TRAIN.COCO_FILE
+        self.coco_json = cfg.TRAIN.COCO_FILE if self.is_train is True else cfg.TEST.COCO_FILE
         self.coco = COCO(self._get_ann_file_keypoint())
 
         # deal with class names
@@ -105,7 +105,8 @@ class COCODataset(JointsDataset):
             return os.path.join(self.coco_train_json)
 
         # prefix = 'person_keypoints' \
-        prefix = 'RHPE_anatomical_ROIs'
+        prefix = 'RHPE_anatomical_ROIs' \
+            if 'test' not in self.image_set else 'image_info'
 
         image_set = self.image_set.split('_')[-1]
 
@@ -273,6 +274,7 @@ class COCODataset(JointsDataset):
             joints_3d_vis = np.ones(
                 (self.num_joints, 3), dtype=np.float64)
             kpt_db.append({
+                'image_id': det_res['image_id'],
                 'image': img_name,
                 'center': center,
                 'scale': scale,
@@ -340,17 +342,13 @@ class COCODataset(JointsDataset):
 
         self._write_coco_keypoint_results(
             oks_nmsed_kpts, res_file)
-        # if 'test' not in self.image_set:
-        #     info_str = self._do_python_keypoint_eval(
-        #         res_file, res_folder)
-        #     name_value = OrderedDict(info_str)
-        #     return name_value, name_value['AP']
-        # else:
-        #     return {'Null': 0}, 0
-
-        info_str = self._do_python_keypoint_eval(res_file, res_folder)
-        name_value = OrderedDict(info_str)
-        return name_value, name_value['AP']
+        if 'test' not in self.image_set:
+            info_str = self._do_python_keypoint_eval(
+                res_file, res_folder)
+            name_value = OrderedDict(info_str)
+            return name_value, name_value['AP']
+        else:
+            return {'Null': 0}, 0
 
     def _write_coco_keypoint_results(self, keypoints, res_file):
         data_pack = [{'cat_id': self._class_to_coco_ind[cls],
