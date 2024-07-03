@@ -95,6 +95,8 @@ class KeypointDB:
 
         shapes = labelme.LabelFile(filename=self.json_file_list[0]).shapes
         for s in shapes:
+            if s['label'] == "Foot":
+                continue
             categories['keypoints'].append(s["label"])
 
         self.db['categories'].append(categories)
@@ -115,7 +117,7 @@ class KeypointDB:
                 origin_image_path = osp.join(self.input_dir, data.get("imagePath"))
                 out_img_file = osp.join(self.output_dir, "Images", str(image_id) + ".png")
 
-                shutil.copy(src=origin_image_path,dst=out_img_file)
+                shutil.copy(src=origin_image_path, dst=out_img_file)
 
                 image_info = dict(
                     license=0,
@@ -129,7 +131,7 @@ class KeypointDB:
                 )
                 shapes = data['shapes']
                 annotation_db = dict(
-                    area=[],
+                    area=0,
                     iscrowd=0,
                     image_id=image_id,
                     bbox=[],
@@ -138,10 +140,18 @@ class KeypointDB:
                     keypoints=[],
                     num_keypoints=17,
                 )
+                num_keypoints = 0
                 for s in shapes:
+                    if s["shape_type"] == "rectangle":
+                        x0, y0 = s.get("points")[0]
+                        x1, y1 = s.get("points")[1]
+                        annotation_db['bbox'] = [x0, y0, x1 - x0, y1 - y0]
+                        annotation_db['area'] = annotation_db['bbox'][2] * annotation_db['bbox'][3]
+                        continue
+                    num_keypoints += 1
                     point_coord = [s.get("points")[0][0], s.get("points")[0][1], 2]
                     annotation_db['keypoints'].extend(point_coord)
-
+                annotation_db['num_keypoints'] = num_keypoints
                 self.db['images'].append(image_info)
                 self.db['annotations'].append(annotation_db)
             #
