@@ -103,7 +103,7 @@ class COCODataset(JointsDataset):
          """
 
         if self.coco_json != '':
-            return os.path.join(self.coco_train_json)
+            return os.path.join(self.coco_json)
 
         # prefix = 'person_keypoints' \
         prefix = 'RHPE_anatomical_ROIs'
@@ -342,10 +342,13 @@ class COCODataset(JointsDataset):
         self._write_coco_keypoint_results(
             oks_nmsed_kpts, res_file)
 
-        info_str = self._do_python_keypoint_eval(
-            res_file, res_folder)
-        name_value = OrderedDict(info_str)
-        return name_value, name_value['AP']
+        if 'test' not in self.image_set:
+            info_str = self._do_python_keypoint_eval(
+                res_file, res_folder)
+            name_value = OrderedDict(info_str)
+            return name_value, name_value['AP']
+        else:
+            return {'Null': 0}, 0
 
     def _write_coco_keypoint_results(self, keypoints, res_file):
         data_pack = [{'cat_id': self._class_to_coco_ind[cls],
