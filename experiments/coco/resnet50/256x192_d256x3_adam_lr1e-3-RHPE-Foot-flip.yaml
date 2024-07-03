@@ -43,7 +43,7 @@ LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
   COCO_FILE: 'data/coco/annotations/Foot_train.json'
-  BATCH_SIZE: 2
+  BATCH_SIZE: 4
   SHUFFLE: false
   BEGIN_EPOCH: 0
   END_EPOCH: 100
@@ -60,7 +60,7 @@ TRAIN:
   MOMENTUM: 0.9
   NESTEROV: false
 TEST:
-  BATCH_SIZE: 1
+  BATCH_SIZE: 4
   COCO_FILE: 'data/coco/annotations/Foot_val.json'
   COCO_BBOX_FILE: 'data/coco/annotations/Foot_val.json'
   BBOX_THRE: 1.0

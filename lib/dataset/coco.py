@@ -85,8 +85,11 @@ class COCODataset(JointsDataset):
         logger.info('=> num_images: {}'.format(self.num_images))
 
         self.num_joints = 17
-        self.flip_pairs = [[1, 2], [3, 4], [5, 6], [7, 8],
-                           [9, 10], [11, 12], [13, 14], [15, 16]]
+        # self.flip_pairs = [[1, 2], [3, 4], [5, 6], [7, 8],
+        #                    [9, 10], [11, 12], [13, 14], [15, 16]]
+        self.flip_pairs = [[1, 13], [2, 14], [3, 15], [4, 10],
+                           [5, 11], [6, 12]]
+
         self.parent_ids = None
 
         self.db = self._get_db()
