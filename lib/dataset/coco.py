@@ -93,7 +93,7 @@ class COCODataset(JointsDataset):
         #                    [5, 11], [6, 12]]
         # Foot(Doctor) Flip Pairs
         self.flip_pairs = [[1, 12], [2, 13], [3, 14], [4, 10], [5, 11], [6, 9], [16, 17]]
-        self.flip_pairs = [list(map(lambda x: x-1, pair)) for pair in self.flip_pairs]
+        self.flip_pairs = [list(map(lambda x: x - 1, pair)) for pair in self.flip_pairs]
         self.parent_ids = None
 
         self.db = self._get_db()
@@ -140,6 +140,7 @@ class COCODataset(JointsDataset):
             # load_coco_keypoint
             _coco_keypoints = self._load_coco_keypoint_annotation_kernal(index)
             # more augmentation (WIP)
+            _coco_keypoints_augmentation = self._get_coco_keypoint_augmentation(_coco_keypoints)
             # extend gt_db
             gt_db.extend(_coco_keypoints)
         return gt_db
@@ -212,6 +213,13 @@ class COCODataset(JointsDataset):
             })
 
         return rec
+
+    def _get_coco_keypoint_augmentation(self, db_rec):
+        """
+            This function is used to augment the keypoints during training.(persistantly)
+        """
+        aug_rec = None
+        return aug_rec
 
     def _box2cs(self, box):
         x, y, w, h = box[:4]

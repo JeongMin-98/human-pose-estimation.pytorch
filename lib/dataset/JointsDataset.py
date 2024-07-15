@@ -79,6 +79,7 @@ class JointsDataset(Dataset):
             logger.error('=> fail to read {}'.format(image_file))
             raise ValueError('Fail to read {}'.format(image_file))
 
+        # The below part will be used at lib/dataset/coco.py 
         joints = db_rec['joints_3d']
         joints_vis = db_rec['joints_3d_vis']
 
