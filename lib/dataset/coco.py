@@ -137,7 +137,11 @@ class COCODataset(JointsDataset):
         """ ground truth bbox and keypoints """
         gt_db = []
         for index in self.image_set_index:
-            gt_db.extend(self._load_coco_keypoint_annotation_kernal(index))
+            # load_coco_keypoint
+            _coco_keypoints = self._load_coco_keypoint_annotation_kernal(index)
+            # more augmentation (WIP)
+            # extend gt_db
+            gt_db.extend(_coco_keypoints)
         return gt_db
 
     def _load_coco_keypoint_annotation_kernal(self, index):
