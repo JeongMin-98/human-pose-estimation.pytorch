@@ -10,13 +10,27 @@ from __future__ import print_function
 
 import numpy as np
 import cv2
+import imgaug as ia
+import imgaug.augmenters as iaa
+
+
+def img_aug(image):
+
+    seq = iaa.Sequential([
+        iaa.Fliplr(0.5),
+        iaa.Affine(scale=(0.5, 1.5)),
+        iaa.Multiply((0.5, 1.5)),
+        iaa.GaussianBlur(sigma=(0.0, 3.0))
+    ])
+
+    pass
 
 
 def flip_back(output_flipped, matched_parts):
     '''
     ouput_flipped: numpy.ndarray(batch_size, num_joints, height, width)
     '''
-    assert output_flipped.ndim == 4,\
+    assert output_flipped.ndim == 4, \
         'output_flipped should be [batch_size, num_joints, height, width]'
 
     output_flipped = output_flipped[:, :, :, ::-1]
@@ -43,7 +57,7 @@ def fliplr_joints(joints, joints_vis, width, matched_parts):
         joints_vis[pair[0], :], joints_vis[pair[1], :] = \
             joints_vis[pair[1], :], joints_vis[pair[0], :].copy()
 
-    return joints*joints_vis, joints_vis
+    return joints * joints_vis, joints_vis
 
 
 def transform_preds(coords, center, scale, output_size):

@@ -86,8 +86,10 @@ class KeypointDB:
 
         categories = dict(
             keypoints=[],
-            skeletons=[[1, 2], [2, 3], [3, 16], [4, 5], [5, 6], [6, 16], [7, 8], [8, 9],
-                       [9, 16], [10, 11], [11, 12], [12, 16], [13, 14], [14, 15], [15, 16], [16, 17]],
+            # skeletons=[[1, 2], [2, 3], [3, 16], [4, 5], [5, 6], [6, 16], [7, 8], [8, 9],
+            #            [9, 16], [10, 11], [11, 12], [12, 16], [13, 14], [14, 15], [15, 16], [16, 17]],
+            skeletons = [[1, 2], [2,3], [3, 15], [4,5], [5,6], [6,15], [7, 8], [8,9], [9, 15],
+                        [10, 11], [11,9], [12, 13], [13,14], [14,17],[15,16]],
             id=1,
             name="foot",
             supercategory="foot"
@@ -95,7 +97,7 @@ class KeypointDB:
 
         shapes = labelme.LabelFile(filename=self.json_file_list[0]).shapes
         for s in shapes:
-            if s['label'] == "Foot":
+            if s['label'] == "Foot" or s['label'] == "foot":
                 continue
             categories['keypoints'].append(s["label"])
 

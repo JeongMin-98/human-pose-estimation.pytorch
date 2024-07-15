@@ -87,9 +87,12 @@ class COCODataset(JointsDataset):
         self.num_joints = 17
         # self.flip_pairs = [[1, 2], [3, 4], [5, 6], [7, 8],
         #                    [9, 10], [11, 12], [13, 14], [15, 16]]
-        self.flip_pairs = [[1, 13], [2, 14], [3, 15], [4, 10],
-                           [5, 11], [6, 12]]
-
+        # Foot Flip Pairs
+        # self.flip_pairs = [[1, 13], [2, 14], [3, 15], [4, 10],
+        #                    [5, 11], [6, 12]]
+        # Foot(Doctor) Flip Pairs
+        self.flip_pairs = [[1, 12], [2, 13], [3, 14], [4, 10], [5, 11], [6, 9], [16, 17]]
+        self.flip_pairs = [list(map(lambda x: x-1, pair)) for pair in self.flip_pairs]
         self.parent_ids = None
 
         self.db = self._get_db()

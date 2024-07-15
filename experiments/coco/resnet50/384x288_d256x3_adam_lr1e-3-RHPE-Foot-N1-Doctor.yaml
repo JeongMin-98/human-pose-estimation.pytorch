@@ -1,7 +1,7 @@
 GPUS: '0'
 DATA_DIR: ''
-OUTPUT_DIR: 'output'
-LOG_DIR: 'log'
+OUTPUT_DIR: 'output/d1'
+LOG_DIR: 'log/d1'
 WORKERS: 1
 PRINT_FREQ: 5
 
@@ -9,23 +9,23 @@ DATASET:
   DATASET: 'coco'
   ROOT: 'data/coco/'
   DATA_FORMAT: 'png'
-  TEST_SET: 'Xray_Foot'
-  TRAIN_SET: 'Xray_Foot'
-  FLIP: false
+  TEST_SET: 'Foot_New_Doctor'
+  TRAIN_SET: 'Foot_New_Doctor'
+  FLIP: true
   ROT_FACTOR: 40
   SCALE_FACTOR: 0.3
 MODEL:
   NAME: 'pose_resnet'
   PRETRAINED: 'output/coco/pose_resnet_50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage/model_best.pth.tar'
   IMAGE_SIZE:
-  - 192
-  - 256
+  - 288
+  - 384
   NUM_JOINTS: 17
   EXTRA:
     TARGET_TYPE: 'gaussian'
     HEATMAP_SIZE:
-    - 48
-    - 64
+    - 72
+    - 96
     SIGMA: 2
     FINAL_CONV_KERNEL: 1
     DECONV_WITH_BIAS: false
@@ -42,11 +42,11 @@ MODEL:
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
-  COCO_FILE: 'data/coco/annotations/Foot_train.json'
+  COCO_FILE: 'data/coco/annotations/Foot_Doctor_n1_train.json'
   BATCH_SIZE: 4
-  SHUFFLE: false
+  SHUFFLE: true
   BEGIN_EPOCH: 0
-  END_EPOCH: 100
+  END_EPOCH: 300
   RESUME: false
   OPTIMIZER: 'adam'
   LR: 0.001
@@ -61,10 +61,10 @@ TRAIN:
   NESTEROV: false
 TEST:
   BATCH_SIZE: 4
-  COCO_FILE: 'data/coco/annotations/Foot_val.json'
-  COCO_BBOX_FILE: 'data/coco/annotations/Foot_val.json'
+  COCO_FILE: 'data/coco/annotations/Foot_Doctor_n1_val.json'
+  COCO_BBOX_FILE: 'data/coco/annotations/Foot_Doctor_n1_val.json'
   BBOX_THRE: 1.0
-  FLIP_TEST: true
+  FLIP_TEST: false
   IMAGE_THRE: 0.0
   IN_VIS_THRE: 0.2
   MODEL_FILE: ''
