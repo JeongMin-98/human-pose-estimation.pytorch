@@ -27,8 +27,9 @@ logger = logging.getLogger(__name__)
 
 class COCODataset(JointsDataset):
     '''
+    " keypoints, skeleton info : https://www.notion.so/annotation-1ff1d6d38eab4d2daf468d5c2364bb5b
     "keypoints": {
-        1: "f1_0" 엄지
+        1: "f1_0"
         2: "f1_1"
         3: "f1_2"
         4: "f2_0" 검지
