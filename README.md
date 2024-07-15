@@ -60,7 +60,7 @@ My code is also tested using 1 NVIDIA GeForce RTX 3060 GPU cards.
 
 ## Quick start
 ### Installation
-MayBe You could not follow below step(1~3)
+Maybe You don't need to follow below step(1~3)
 1. Install pytorch >= v0.4.0 following [official instruction](https://pytorch.org/).
 2. Disable cudnn for batch_norm:
    ```
