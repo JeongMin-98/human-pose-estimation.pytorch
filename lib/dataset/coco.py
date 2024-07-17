@@ -16,6 +16,9 @@ from collections import OrderedDict
 
 import json_tricks as json
 import numpy as np
+# import imgaug as ia
+# import imgaug.augmenters as iaa
+# from imgaug.augmentables import BoundingBox, BoundingBoxesOnImage, Keypoint, KeypointsOnImage
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 
@@ -140,7 +143,7 @@ class COCODataset(JointsDataset):
             # load_coco_keypoint
             _coco_keypoints = self._load_coco_keypoint_annotation_kernal(index)
             # more augmentation (WIP)
-            _coco_keypoints_augmentation = self._get_coco_keypoint_augmentation(_coco_keypoints)
+            # _coco_keypoints_augmentation = self._get_coco_keypoint_augmentation(_coco_keypoints)
             # extend gt_db
             gt_db.extend(_coco_keypoints)
         return gt_db
@@ -216,9 +219,15 @@ class COCODataset(JointsDataset):
 
     def _get_coco_keypoint_augmentation(self, db_rec):
         """
-            This function is used to augment the keypoints during training.(persistantly)
+            This function is used to augment the keypoints during training.(persistently)
         """
-        aug_rec = None
+        aug_rec = []
+        for rec in db_rec:
+            joints = db_rec['joints_3d']
+            joints_vis = db_rec['joints_3d_vis']
+            c = db_rec['center']
+            s = db_rec['scale']
+
         return aug_rec
 
     def _box2cs(self, box):
