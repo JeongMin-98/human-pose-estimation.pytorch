@@ -1,11 +1,14 @@
 import argparse
 import json
-import os
 
+import os
+import numpy as np
 import imageio
 import imgaug.augmenters as iaa
 from imgaug.augmentables import BoundingBox, BoundingBoxesOnImage, Keypoint, KeypointsOnImage
-
+from copy import deepcopy
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 # from convert2COCO import Labelme2COCOKeypointDB
 from COCOformat import ImageInfo, Annotation, KeypointDB
 
@@ -13,9 +16,9 @@ from COCOformat import ImageInfo, Annotation, KeypointDB
 num_augmented_images = 5
 # 증강 시퀀스 정의
 seq = iaa.Sequential([
-    iaa.Fliplr(0.5),  # 좌우 반전
+    # iaa.Fliplr(0.5),  # 좌우 반전
     # iaa.Affine(scale=(0.5, 1.5)),  # 스케일링
-    iaa.Rotate((-45, 45)),  # 밝기 조절
+    iaa.Rotate((-90, 90)),  # 밝기 조절
     # iaa.GaussianBlur(sigma=(0.0, 3.0))  # 가우시안 블러
 ])
 
@@ -49,6 +52,11 @@ def arg_parser():
 #     if db.load_coco is False:
 #         raise Exception("DB must be loaded!!")
 
+def convert_to_color(image):
+    if image.ndim == 2:  # Check if the image is grayscale
+        image = np.stack((image,) * 3, axis=-1)  # Convert to 3D by stacking the grayscale values
+    return image
+
 
 def load_json_before_imgaug(args):
     input_image_dir = args.input_dir
@@ -65,16 +73,25 @@ def load_json_before_imgaug(args):
 
     with open(input_keypoints_file, "r") as f:
         keypoints_data = json.load(f)
-
+    aug_db.db['categories'] = keypoints_data['categories']
     last_image_id = keypoints_data['images'][-1]["id"]
     last_annotation_id = keypoints_data['annotations'][-1]["id"]
-
+    pbar = tqdm(len(keypoints_data['images']))
     for i, image_info in enumerate(keypoints_data['images']):
         image_path = os.path.join(input_image_dir, image_info['file_name'])
-        image = imageio.v3.imread(image_path)
+        image = convert_to_color(imageio.v3.imread(image_path))
 
-        aug_db.db['images'].append(keypoints_data['images'][i])
-        aug_db.db['annotations'].append(keypoints_data['annotations'][i])
+        original_image_info = deepcopy(keypoints_data['images'][i])
+        original_image_info["id"] = last_image_id
+        original_image_info["file_name"] = image_info['file_name']
+        aug_db.db['images'].append(original_image_info)
+        original_annotation_info = deepcopy(keypoints_data['annotations'][i])
+        original_annotation_info["image_id"] = last_image_id
+        original_annotation_info["id"] = last_annotation_id
+        aug_db.db['annotations'].append(original_annotation_info)
+
+        last_image_id += 1
+        last_annotation_id += 1
 
         bbox = keypoints_data['annotations'][i]['bbox']
         bbox = BoundingBox(x1=bbox[0], y1=bbox[1], x2=bbox[0] + bbox[2], y2=bbox[1] + bbox[3], label='foot')
@@ -89,21 +106,25 @@ def load_json_before_imgaug(args):
                 keypoint_bucket.append(Keypoint(x=x, y=y))
 
         keypoint_on_image = KeypointsOnImage(keypoint_bucket, shape=image.shape)
+        pbar.update(1)
 
         for j in range(5):
             image_aug, bbox_aug, keypoints_aug = seq(image=image, bounding_boxes=bbox_on_image,
                                                      keypoints=keypoint_on_image)
 
             # file save
-            new_file_name = f"{image_info['file_name']}_aug_{j}.jpg"
+            new_file_name = f"{last_image_id - 1}{j}.png"
             new_image_path = os.path.join(output_image_dir, new_file_name)
             imageio.v3.imwrite(new_image_path, image_aug)
 
+            # image_after_aug = bbox_aug.draw_on_image(image_aug, size=2, color=[0, 0, 225])
+            # plt.imshow(image_after_aug)
+            # plt.show()
             aug_db.db['images'].append(ImageInfo(
                 license=0,
                 coco_url='',
                 flickr_url='',
-                file_name=os.path.relpath(new_image_path, os.path.dirname(new_file_name)),
+                file_name=os.path.relpath(new_file_name, os.path.dirname(new_file_name)),
                 height=image_aug.shape[0],
                 width=image_aug.shape[1],
                 date_captured=None,
@@ -132,8 +153,10 @@ def load_json_before_imgaug(args):
 
             last_image_id += 1
             last_annotation_id += 1
-
+    pbar.close()
+    f.close()
     aug_db.saver()
+
 
 if __name__ == "__main__":
     args = arg_parser()
