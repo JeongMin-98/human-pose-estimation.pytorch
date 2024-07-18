@@ -11,36 +11,13 @@ import os.path as osp
 import shutil
 from tqdm import tqdm
 
-from dataclasses import dataclass
+
+from COCOformat import ImageInfo, Annotation, KeypointDB, COCOEncoder
 
 import json
 import glob
 import labelme
 import imgviz
-
-
-@dataclass
-class ImageInfo:
-    license: int
-    coco_url: str
-    flickr_url: str
-    file_name: str
-    height: int
-    width: int
-    date_captured: None
-    id: int
-
-
-@dataclass
-class Annotation:
-    area: int
-    iscrowd: int
-    image_id: int
-    bbox: list
-    category_id: int
-    id: int
-    keypoints: list
-    num_keypoints: int
 
 
 def arg_parser():
@@ -66,37 +43,12 @@ def arg_parser():
     return args
 
 
-class KeypointDB:
+class Labelme2COCOKeypointDB(KeypointDB):
     def __init__(self, args, json_file=None, is_load_coco=False):
+        super().__init__(args, json_file=None, is_load_coco=False)
         self.output_dir = args.output_dir
         self.input_dir = args.input_dir
         self.json_file_list = json_file
-        self.db = dict(
-            info=dict(
-                description=None,
-                url=None,
-                version=None,
-                year="",
-                contributor="",
-                date_created="",
-            ),
-            licenses=[
-                dict(
-                    url=None,
-                    id=0,
-                    name=None,
-                )
-            ],
-            images=[
-                # license, url, file_name, height, width, date_captured, id
-            ],
-            annotations=[
-                # segmentation, area, iscrowd, image_id, bbox, category_id, id
-            ],
-            categories=[
-                # supercategory, id, name
-            ],
-        )
 
         if not is_load_coco:
             if self.json_file_list is None:
@@ -190,19 +142,6 @@ class KeypointDB:
             # except FileNotFoundError:
             #     print(f"Files {filename} not found")
 
-    def load_coco_json(self):
-        # If you load coco json file, json file is only one file
-        with open(self.json_file_list, 'r') as file:
-            data = json.load(file)
-            self.db = data
-        return
-
-    def saver(self):
-        with open(osp.join(self.output_dir, "annotations.json"), 'w') as f:
-            json.dump(self.db, f, indent=4)
-
-        print(f"save json -> {osp.join(self.output_dir, 'annotations.json')}")
-
     def augmentation(self):
         print("Augmentation DB")
         print("=============================================")
@@ -219,7 +158,7 @@ def main():
     print("Creating Dataset to: ", args.output_dir)
     print("=============================================")
 
-    db = KeypointDB(args, json_file_list=glob.glob(osp.join(args.input_dir, "*.json")))
+    db = Labelme2COCOKeypointDB(args, json_file=glob.glob(osp.join(args.input_dir, "*.json")))
     db.saver()
 
 

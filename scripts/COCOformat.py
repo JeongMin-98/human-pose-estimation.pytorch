@@ -4,6 +4,7 @@
 # Written by JeongMin Kim(jm.kim@dankook.ac.kr)
 # ----------------------------------------------------
 import json
+import numpy as np
 from dataclasses import dataclass
 from os import path as osp
 
@@ -14,21 +15,21 @@ class ImageInfo():
     coco_url: str
     flickr_url: str
     file_name: str
-    height: int
-    width: int
+    height: (int, float)
+    width: (int, float)
     date_captured: None
     id: int
 
 
 @dataclass
 class Annotation:
-    area: int
+    area: float
     iscrowd: int
     image_id: int
-    bbox: list
+    bbox: list[float]
     category_id: int
     id: int
-    keypoints: list
+    keypoints: list[float]
     num_keypoints: int
 
 
@@ -36,6 +37,8 @@ class COCOEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, (ImageInfo, Annotation)):
             return o.__dict__
+        if isinstance(o, np.float32):
+            return float(o)
         return super().default(o)
 
 

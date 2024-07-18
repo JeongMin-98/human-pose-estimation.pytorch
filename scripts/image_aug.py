@@ -23,14 +23,14 @@ seq = iaa.Sequential([
 def arg_parser():
     parser = argparse.ArgumentParser(description="Image augmentation")
     parser.add_argument("--input_dir",
-                        default="/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/Images",
+                        default="../data/coco/imgaug/cocot/Images",
                         help="input annotated your directory")
     parser.add_argument("--output_dir",
-                        default="/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/imgaugtest",
+                        default="../data/coco/imgaugtest",
                         help="output dataset directory"
                         )
     parser.add_argument("--json",
-                        default='your.json')
+                        default='../data/coco/imgaug/cocot/annotations.json')
     args = parser.parse_args()
     return args
 
@@ -52,8 +52,9 @@ def arg_parser():
 
 def load_json_before_imgaug(args):
     input_image_dir = args.input_dir
-    # input_keypoints_file = os.path.join(input_image_dir, args.json)
-    input_keypoints_file = "/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/annotations.json"
+    input_keypoints_file = os.path.join(args.json)
+    # input_keypoints_file = "/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/annotations.json"
+    # input_keypoints_file = "../data/coco/Foot_ann(D)_new/Foot_Doctor_n1_annotations.json"
     output_image_dir = args.output_dir
     if not os.path.exists(output_image_dir):
         os.makedirs(output_image_dir)
@@ -65,13 +66,18 @@ def load_json_before_imgaug(args):
     with open(input_keypoints_file, "r") as f:
         keypoints_data = json.load(f)
 
+    last_image_id = keypoints_data['images'][-1]["id"]
+    last_annotation_id = keypoints_data['annotations'][-1]["id"]
+
     for i, image_info in enumerate(keypoints_data['images']):
         image_path = os.path.join(input_image_dir, image_info['file_name'])
         image = imageio.v3.imread(image_path)
 
+        aug_db.db['images'].append(keypoints_data['images'][i])
+        aug_db.db['annotations'].append(keypoints_data['annotations'][i])
+
         bbox = keypoints_data['annotations'][i]['bbox']
         bbox = BoundingBox(x1=bbox[0], y1=bbox[1], x2=bbox[0] + bbox[2], y2=bbox[1] + bbox[3], label='foot')
-        print(bbox.coords)
 
         bbox_on_image = BoundingBoxesOnImage([bbox], shape=image.shape)
 
@@ -98,12 +104,36 @@ def load_json_before_imgaug(args):
                 coco_url='',
                 flickr_url='',
                 file_name=os.path.relpath(new_image_path, os.path.dirname(new_file_name)),
-                height=image_aug.shape,
-                width=image_aug.shape,
+                height=image_aug.shape[0],
+                width=image_aug.shape[1],
                 date_captured=None,
-                id=1,
+                id=last_image_id,
             ))
 
+            temp_bbox_aug = bbox_aug.bounding_boxes[0]
+
+            # There is only one bbox.
+            aug_db.db['annotations'].append(Annotation(
+                area=temp_bbox_aug.area,
+                iscrowd=0,
+                image_id=last_image_id,
+                bbox=[],
+                keypoints=[],
+                num_keypoints=17,
+                id=last_annotation_id,
+                category_id=1,
+            ))
+
+            aug_db.db['annotations'][-1].bbox.extend(
+                [temp_bbox_aug.x1, temp_bbox_aug.y1, temp_bbox_aug.width, temp_bbox_aug.height])
+
+            for keypoint in keypoints_aug.keypoints:
+                aug_db.db['annotations'][-1].keypoints.extend([keypoint.x, keypoint.y, 2])
+
+            last_image_id += 1
+            last_annotation_id += 1
+
+    aug_db.saver()
 
 if __name__ == "__main__":
     args = arg_parser()
