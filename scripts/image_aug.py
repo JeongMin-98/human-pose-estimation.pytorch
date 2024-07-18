@@ -1,12 +1,13 @@
-import os
-import json
 import argparse
+import json
+import os
+
 import imageio
-import imgaug as ia
 import imgaug.augmenters as iaa
 from imgaug.augmentables import BoundingBox, BoundingBoxesOnImage, Keypoint, KeypointsOnImage
-import numpy as np
-from convert2COCO import KeypointDB, ImageInfo, Annotation
+
+# from convert2COCO import Labelme2COCOKeypointDB
+from COCOformat import ImageInfo, Annotation, KeypointDB
 
 # 증강할 이미지 개수
 num_augmented_images = 5
@@ -22,10 +23,10 @@ seq = iaa.Sequential([
 def arg_parser():
     parser = argparse.ArgumentParser(description="Image augmentation")
     parser.add_argument("--input_dir",
-                        default="/home/jeongmin/human-pose-estimation.pytorch/data/coco/Foot_ann(D)_new/Images",
+                        default="/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/Images",
                         help="input annotated your directory")
     parser.add_argument("--output_dir",
-                        default="/home/jeongmin/human-pose-estimation.pytorch/data/coco/imgaugtest",
+                        default="/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/imgaugtest",
                         help="output dataset directory"
                         )
     parser.add_argument("--json",
@@ -34,33 +35,36 @@ def arg_parser():
     return args
 
 
-def append_annotations(db: KeypointDB, keypoints: list[Keypoint], bboxes: list[BoundingBox]):
-    temp_keypoint = []
-    temp_bbox = []
-
-    for keypoint in keypoints:
-        x, y, v = keypoint.x, keypoint.y, 2
-        temp_keypoint.extend([x, y, v])
-    for bbox in bboxes:
-        temp_bbox.extend([bbox.x1, bbox.y1, bbox.width, bbox.height])
-
-    # db must be loaded.
-    if db.load_coco is False:
-        raise Exception("DB must be loaded!!")
+# def append_annotations(db: Labelme2COCOKeypointDB, keypoints: list[Keypoint], bboxes: list[BoundingBox]):
+#     temp_keypoint = []
+#     temp_bbox = []
+#
+#     for keypoint in keypoints:
+#         x, y, v = keypoint.x, keypoint.y, 2
+#         temp_keypoint.extend([x, y, v])
+#     for bbox in bboxes:
+#         temp_bbox.extend([bbox.x1, bbox.y1, bbox.width, bbox.height])
+#
+#     # db must be loaded.
+#     if db.load_coco is False:
+#         raise Exception("DB must be loaded!!")
 
 
 def load_json_before_imgaug(args):
     input_image_dir = args.input_dir
     # input_keypoints_file = os.path.join(input_image_dir, args.json)
-    input_keypoints_file = "/home/jeongmin/human-pose-estimation.pytorch/data/coco/Foot_ann(D)_new/Foot_Doctor_n1_annotations.json"
+    input_keypoints_file = "/home/mlpa_jm/PoseXray/data/Foot_Data/test_out/annotations.json"
     output_image_dir = args.output_dir
     if not os.path.exists(output_image_dir):
         os.makedirs(output_image_dir)
+    else:
+        pass
 
     aug_db = KeypointDB(args, json_file=input_keypoints_file, is_load_coco=True)
 
     with open(input_keypoints_file, "r") as f:
         keypoints_data = json.load(f)
+
     for i, image_info in enumerate(keypoints_data['images']):
         image_path = os.path.join(input_image_dir, image_info['file_name'])
         image = imageio.v3.imread(image_path)
@@ -84,12 +88,21 @@ def load_json_before_imgaug(args):
             image_aug, bbox_aug, keypoints_aug = seq(image=image, bounding_boxes=bbox_on_image,
                                                      keypoints=keypoint_on_image)
 
-            # prepare image_info
-
             # file save
             new_file_name = f"{image_info['file_name']}_aug_{j}.jpg"
             new_image_path = os.path.join(output_image_dir, new_file_name)
             imageio.v3.imwrite(new_image_path, image_aug)
+
+            aug_db.db['images'].append(ImageInfo(
+                license=0,
+                coco_url='',
+                flickr_url='',
+                file_name=os.path.relpath(new_image_path, os.path.dirname(new_file_name)),
+                height=image_aug.shape,
+                width=image_aug.shape,
+                date_captured=None,
+                id=1,
+            ))
 
 
 if __name__ == "__main__":
