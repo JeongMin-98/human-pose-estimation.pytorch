@@ -53,19 +53,29 @@ def split_data(filtered_images, filtered_annotations, category):
     train_images = filtered_images[:train_size]
     val_images = filtered_images[train_size:]
 
+    half = int(0.5 * len(val_images))
+    test_images = val_images[half:]
+    val_images = val_images[:half]
+
     train_image_ids = {img['id'] for img in train_images}
     val_image_ids = {img['id'] for img in val_images}
+    test_image_ids = {img['id'] for img in test_images}
 
     train_annotations = [ann for ann in filtered_annotations if ann['image_id'] in train_image_ids]
     val_annotations = [ann for ann in filtered_annotations if ann['image_id'] in val_image_ids]
+    test_annotations = [ann for ann in filtered_annotations if ann['image_id'] in test_image_ids]
 
     train_data = make_filtered_data_db(train_images, train_annotations, category)
     val_data = make_filtered_data_db(val_images, val_annotations, category)
+    test_data = make_filtered_data_db(test_images, test_annotations, category)
 
-    return train_data, val_data
+    return train_data, val_data, test_data
 
 
 def saver(path, data):
+    if data is None:
+        print("Failed save json (Null Data)")
+        return
     with open(path, 'w') as f:
         json.dump(data, f, indent=4)
 
