@@ -199,8 +199,8 @@ def main():
                                           'final_state.pth.tar')
     logger.info('saving final model state to {}'.format(
         final_model_state_file))
-    # torch.save(model.module.state_dict(), final_model_state_file)
-    torch.save(model.state_dict(), final_model_state_file)
+    torch.save(model.module.state_dict(), final_model_state_file)
+    # torch.save(model.state_dict(), final_model_state_file)
     writer_dict['writer'].close()
 
 
