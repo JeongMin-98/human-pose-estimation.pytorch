@@ -1,9 +1,9 @@
 GPUS: '0'
 DATA_DIR: ''
-OUTPUT_DIR: 'output/retrained'
-LOG_DIR: 'log/retrained'
+OUTPUT_DIR: 'output/valid'
+LOG_DIR: 'log/vaild'
 WORKERS: 1
-PRINT_FREQ: 10
+PRINT_FREQ: 5
 
 DATASET:
   DATASET: 'coco'
@@ -16,8 +16,8 @@ DATASET:
   SCALE_FACTOR: 0.3
 MODEL:
   NAME: 'pose_resnet'
-#  PRETRAINED: 'output/coco/pose_resnet_50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage/model_best.pth.tar'
-  PRETRAINED: 'output/retrained/coco/pose_resnet_50/384x288_d256x3_adam_lr1e-3-RHPE-Foot-N2-Doctor-noflip/final_state.pth.tar'
+  # PRETRAINED: 'output/coco/pose_resnet_50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage/model_best.pth.tar'
+  PRETRAINED: 'output/d2/coco/pose_resnet_50/384x288_d256x3_adam_lr1e-3-RHPE-Foot-N2-Doctor-noflip/final_state.pth.tar'
   IMAGE_SIZE:
   - 288
   - 384
@@ -47,7 +47,7 @@ TRAIN:
   BATCH_SIZE: 4
   SHUFFLE: true
   BEGIN_EPOCH: 0
-  END_EPOCH: 100
+  END_EPOCH: 200
   RESUME: false
   OPTIMIZER: 'adam'
   LR: 0.001
@@ -68,7 +68,7 @@ TEST:
   FLIP_TEST: false
   IMAGE_THRE: 0.0
   IN_VIS_THRE: 0.2
-  MODEL_FILE: ''
+  MODEL_FILE: 'output/retrained/coco/pose_resnet_50/384x288_d256x3_adam_lr1e-3-RHPE-Foot-N2-Doctor-noflip/final_state.pth.tar'
   NMS_THRE: 1.0
   OKS_THRE: 0.9
   USE_GT_BBOX: true

@@ -16,8 +16,8 @@ DATASET:
   SCALE_FACTOR: 0.3
 MODEL:
   NAME: 'pose_resnet'
-#  PRETRAINED: 'output/coco/pose_resnet_50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage/model_best.pth.tar'
-  PRETRAINED: 'output/retrained/coco/pose_resnet_50/384x288_d256x3_adam_lr1e-3-RHPE-Foot-N2-Doctor-noflip/final_state.pth.tar'
+  PRETRAINED: 'output/coco/pose_resnet_50/256x192_d256x3_adam_lr1e-3-RHPE-FilteredImage/model_best.pth.tar'
+#  PRETRAINED: 'output/retrained/coco/pose_resnet_50/384x288_d256x3_adam_lr1e-3-RHPE-Foot-N2-Doctor-noflip/final_state.pth.tar'
   IMAGE_SIZE:
   - 288
   - 384
