@@ -7,6 +7,7 @@ import json
 import numpy as np
 from dataclasses import dataclass
 from os import path as osp
+from typing import List, Tuple
 
 
 @dataclass
@@ -15,8 +16,8 @@ class ImageInfo():
     coco_url: str
     flickr_url: str
     file_name: str
-    height: (int, float)
-    width: (int, float)
+    height: Tuple[int, float]
+    width: Tuple[int, float]
     date_captured: None
     id: int
 
@@ -26,10 +27,10 @@ class Annotation:
     area: float
     iscrowd: int
     image_id: int
-    bbox: list[float]
+    bbox: List[float]
     category_id: int
     id: int
-    keypoints: list[float]
+    keypoints: List[float]
     num_keypoints: int
 
 
