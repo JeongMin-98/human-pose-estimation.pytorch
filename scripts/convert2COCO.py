@@ -11,7 +11,8 @@ import os.path as osp
 import shutil
 from tqdm import tqdm
 
-from collections import defaultdict
+
+from COCOformat import ImageInfo, Annotation, KeypointDB, COCOEncoder
 
 import json
 import glob
@@ -33,53 +34,34 @@ def arg_parser():
                         required=False,
                         )
 
-    parser.add_argument("--noviz",
-                        help="no visualization",
-                        action="store_true"
+    parser.add_argument("--imgaug",
+                        help="If you want to augment, This flag is True",
+                        required=True,
                         )
     args = parser.parse_args()
 
     return args
 
 
-class KeypointDB:
-    def __init__(self, args, json_file_list=None):
+class Labelme2COCOKeypointDB(KeypointDB):
+    def __init__(self, args, json_file=None, is_load_coco=False):
+        super().__init__(args, json_file=None, is_load_coco=False)
         self.output_dir = args.output_dir
         self.input_dir = args.input_dir
-        self.json_file_list = json_file_list
-        self.db = dict(
-            info=dict(
-                description=None,
-                url=None,
-                version=None,
-                year="",
-                contributor="",
-                date_created="",
-            ),
-            licenses=[
-                dict(
-                    url=None,
-                    id=0,
-                    name=None,
-                )
-            ],
-            images=[
-                # license, url, file_name, height, width, date_captured, id
-            ],
-            annotations=[
-                # segmentation, area, iscrowd, image_id, bbox, category_id, id
-            ],
-            categories=[
-                # supercategory, id, name
-            ],
-        )
+        self.json_file_list = json_file
 
-        if self.json_file_list is None:
-            raise Exception("Please Input Json file list")
+        if not is_load_coco:
+            if self.json_file_list is None:
+                raise Exception("Please Input Json file list")
 
+            else:
+                self._init_categories()
+                self.generate_db()
         else:
-            self._init_categories()
-            self.generate_db()
+            # _load_coco_json
+            # Only One json_file
+            self.load_coco_json()
+            pass
 
     def _init_categories(self):
         """ Read First annotation Json file and apply base information for categories """
@@ -88,8 +70,8 @@ class KeypointDB:
             keypoints=[],
             # skeletons=[[1, 2], [2, 3], [3, 16], [4, 5], [5, 6], [6, 16], [7, 8], [8, 9],
             #            [9, 16], [10, 11], [11, 12], [12, 16], [13, 14], [14, 15], [15, 16], [16, 17]],
-            skeletons = [[1, 2], [2,3], [3, 15], [4,5], [5,6], [6,15], [7, 8], [8,9], [9, 15],
-                        [10, 11], [11,9], [12, 13], [13,14], [14,17],[15,16]],
+            skeletons=[[1, 2], [2, 3], [3, 15], [4, 5], [5, 6], [6, 15], [7, 8], [8, 9], [9, 15],
+                       [10, 11], [11, 9], [12, 13], [13, 14], [14, 17], [15, 16]],
             id=1,
             name="foot",
             supercategory="foot"
@@ -121,7 +103,7 @@ class KeypointDB:
 
                 shutil.copy(src=origin_image_path, dst=out_img_file)
 
-                image_info = dict(
+                image_info = ImageInfo(
                     license=0,
                     coco_url='',
                     flickr_url='',
@@ -132,7 +114,7 @@ class KeypointDB:
                     id=image_id,
                 )
                 shapes = data['shapes']
-                annotation_db = dict(
+                annotation_db = Annotation(
                     area=0,
                     iscrowd=0,
                     image_id=image_id,
@@ -147,24 +129,22 @@ class KeypointDB:
                     if s["shape_type"] == "rectangle":
                         x0, y0 = s.get("points")[0]
                         x1, y1 = s.get("points")[1]
-                        annotation_db['bbox'] = [x0, y0, x1 - x0, y1 - y0]
-                        annotation_db['area'] = annotation_db['bbox'][2] * annotation_db['bbox'][3]
+                        annotation_db.bbox = [x0, y0, x1 - x0, y1 - y0]
+                        annotation_db.area = annotation_db.bbox[2] * annotation_db.bbox[3]
                         continue
                     num_keypoints += 1
                     point_coord = [s.get("points")[0][0], s.get("points")[0][1], 2]
-                    annotation_db['keypoints'].extend(point_coord)
-                annotation_db['num_keypoints'] = num_keypoints
+                    annotation_db.keypoints.extend(point_coord)
+                annotation_db.num_keypoints = num_keypoints
                 self.db['images'].append(image_info)
                 self.db['annotations'].append(annotation_db)
             #
             # except FileNotFoundError:
             #     print(f"Files {filename} not found")
 
-    def saver(self):
-        with open(osp.join(self.output_dir, "annotations.json"), 'w') as f:
-            json.dump(self.db, f, indent=4)
-
-        print(f"save json -> {osp.join(self.output_dir, 'annotations.json')}")
+    def augmentation(self):
+        print("Augmentation DB")
+        print("=============================================")
 
 
 def main():
@@ -178,7 +158,7 @@ def main():
     print("Creating Dataset to: ", args.output_dir)
     print("=============================================")
 
-    db = KeypointDB(args, json_file_list=glob.glob(osp.join(args.input_dir, "*.json")))
+    db = Labelme2COCOKeypointDB(args, json_file=glob.glob(osp.join(args.input_dir, "*.json")))
     db.saver()
 
 

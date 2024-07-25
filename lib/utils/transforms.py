@@ -15,7 +15,6 @@ import imgaug.augmenters as iaa
 
 
 def img_aug(image):
-
     seq = iaa.Sequential([
         iaa.Fliplr(0.5),
         iaa.Affine(scale=(0.5, 1.5)),
@@ -124,6 +123,10 @@ def get_dir(src_point, rot_rad):
     src_result[1] = src_point[0] * sn + src_point[1] * cs
 
     return src_result
+
+
+def img_augmentor():
+    pass
 
 
 def crop(img, center, scale, output_size, rot=0):
