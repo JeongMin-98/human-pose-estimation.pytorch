@@ -53,6 +53,58 @@ def save_batch_image_with_joints(batch_image, batch_joints, batch_joints_vis,
     cv2.imwrite(file_name, ndarr)
 
 
+def save_batch_image_with_joints_fixed(batch_image, batch_joints, batch_joints_vis,
+                                       file_name, nrow=8, padding=2, flip_pairs=None, is_flipped_list=None):
+    '''
+    batch_image: [batch_size, channel, height, width]
+    batch_joints: [batch_size, num_joints, 3]
+    batch_joints_vis: [batch_size, num_joints, 1]
+    file_name: 저장할 파일명
+    flip_pairs: keypoint 좌우 반전 매칭 리스트
+    is_flipped_list: 각 이미지별 flip 여부 리스트 (배치 크기만큼 존재)
+    '''
+    import math
+    batch_size = batch_image.size(0)
+    if is_flipped_list is None:
+        is_flipped_list = [False] * batch_size  # 기본값: 모두 False
+
+    grid = torchvision.utils.make_grid(batch_image, nrow=nrow, padding=padding, normalize=True)
+    ndarr = grid.mul(255).clamp(0, 255).byte().permute(1, 2, 0).cpu().numpy()
+    ndarr = ndarr.copy()
+
+    xmaps = min(nrow, batch_size)
+    ymaps = int(math.ceil(float(batch_size) / xmaps))
+    img_height = int(batch_image.size(2) + padding)
+    img_width = int(batch_image.size(3) + padding)
+    
+    k = 0
+    for y in range(ymaps):
+        for x in range(xmaps):
+            if k >= batch_size:
+                break
+
+            joints = batch_joints[k].clone()
+            joints_vis = batch_joints_vis[k].clone()
+            is_flipped = is_flipped_list[k]  # 개별적으로 flip 여부 확인
+
+            # Flip된 keypoint를 원래 위치로 복구
+            if is_flipped and flip_pairs is not None:
+                joints[:, 0] = batch_image.size(3) - joints[:, 0] - 1  # X 좌표 반전
+                for pair in flip_pairs:
+                    joints[pair[0], :], joints[pair[1], :] = joints[pair[1], :].clone(), joints[pair[0], :].clone()
+                    joints_vis[pair[0], :], joints_vis[pair[1], :] = joints_vis[pair[1], :].clone(), joints_vis[pair[0], :].clone()
+
+            for i, (joint, joint_vis) in enumerate(zip(joints, joints_vis)):
+                joint_x = int(x * img_width + padding + joint[0])
+                joint_y = int(y * img_height + padding + joint[1])
+                if joint_vis[0]:
+                    cv2.circle(ndarr, (joint_x, joint_y), 2, [255, 0, 0], 1)
+                    cv2.putText(ndarr, str(i), (joint_x, joint_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, [51, 255, 102], 1, cv2.LINE_AA)
+            k += 1
+
+    cv2.imwrite(file_name, ndarr)
+
+
 def save_batch_heatmaps(batch_image, batch_heatmaps, file_name,
                         normalize=True):
     '''

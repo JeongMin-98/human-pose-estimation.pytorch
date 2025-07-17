@@ -88,6 +88,7 @@ class JointsDataset(Dataset):
         score = db_rec['score'] if 'score' in db_rec else 1
         r = 0
 
+        is_flipped = False
         if self.is_train:
             sf = self.scale_factor
             rf = self.rotation_factor
@@ -101,6 +102,7 @@ class JointsDataset(Dataset):
                 joints, joints_vis = fliplr_joints(
                     joints, joints_vis, data_numpy.shape[1], self.flip_pairs)
                 c[0] = data_numpy.shape[1] - c[0] - 1
+                is_flipped = True
 
         trans = get_affine_transform(c, s, r, self.image_size)
         input = cv2.warpAffine(
@@ -132,7 +134,8 @@ class JointsDataset(Dataset):
             'center': c,
             'scale': s,
             'rotation': r,
-            'score': score
+            'score': score,
+            'is_flipped': is_flipped
         }
 
         return input, target, target_weight, meta

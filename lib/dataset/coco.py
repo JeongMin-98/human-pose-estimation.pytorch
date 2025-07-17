@@ -325,13 +325,18 @@ class COCODataset(JointsDataset):
         # person x (keypoints)
         _kpts = []
         for idx, kpt in enumerate(preds):
+            filename = img_path[idx].split('/')[-1][:-4]
+            if filename.isdigit():
+                image_value = int(filename)
+            else:
+                image_value = filename
             _kpts.append({
                 'keypoints': kpt,
                 'center': all_boxes[idx][0:2],
                 'scale': all_boxes[idx][2:4],
                 'area': all_boxes[idx][4],
                 'score': all_boxes[idx][5],
-                'image': int(img_path[idx].split('/')[-1][:-4]),
+                'image': image_value,
                 'image_id': image_id[idx]
             })
             # print(_kpts[-1])

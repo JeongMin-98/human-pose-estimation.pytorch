@@ -20,6 +20,7 @@ from core.evaluate import accuracy
 from core.inference import get_final_preds
 from utils.transforms import flip_back
 from utils.vis import save_debug_images
+from utils.vis import save_batch_image_with_joints_fixed
 
 
 logger = logging.getLogger(__name__)
@@ -82,8 +83,16 @@ def train(config, train_loader, model, criterion, optimizer, epoch,
             writer_dict['train_global_steps'] = global_steps + 1
 
             prefix = '{}_{}'.format(os.path.join(output_dir, 'train'), i)
-            save_debug_images(config, input, meta, target, pred*4, output,
-                              prefix)
+            is_flipped_list = meta['is_flipped']
+            flip_pairs = train_loader.dataset.flip_pairs
+            save_batch_image_with_joints_fixed(
+                input, meta['joints'], meta['joints_vis'],
+                file_name=prefix + '.jpg',
+                nrow=8,
+                padding=2,
+                flip_pairs=flip_pairs,
+                is_flipped_list=is_flipped_list
+            )
 
 
 def validate(config, val_loader, val_dataset, model, criterion, output_dir,
@@ -176,8 +185,16 @@ def validate(config, val_loader, val_dataset, model, criterion, output_dir,
                 logger.info(msg)
 
                 prefix = '{}_{}'.format(os.path.join(output_dir, 'val'), i)
-                save_debug_images(config, input, meta, target, pred*4, output,
-                                  prefix)
+                is_flipped_list = meta['is_flipped']
+                flip_pairs = val_loader.dataset.flip_pairs
+                save_batch_image_with_joints_fixed(
+                    input, meta['joints'], meta['joints_vis'],
+                    file_name=prefix + '.jpg',
+                    nrow=8,
+                    padding=2,
+                    flip_pairs=flip_pairs,
+                    is_flipped_list=is_flipped_list
+                )
 
         name_values, perf_indicator = val_dataset.evaluate(
             config, all_preds, output_dir, all_boxes, image_path, image_id,
